@@ -220,7 +220,9 @@ func (t *ReferralPartnerChaincodeBroker) createReferral(stub *shim.ChaincodeStub
 	// Create a ledger record that indexes the referral id by the partner
 	for i := range referral.Departments {
 	    if referral.Departments[i] == "RETAIL" {
+			fmt.Println("Running Retail create chaincode for payload: " + referralData)
 			valAsbytes, err = stub.InvokeChaincode(t.RetailChaincode, "Invoke", args)
+			
 		} else if referral.Departments[i] == "COMMERCIAL" {
 			valAsbytes, err = stub.InvokeChaincode(t.CommercialChaincode, "Invoke", args)
 		} else if referral.Departments[i] == "BANKING" {
@@ -231,6 +233,11 @@ func (t *ReferralPartnerChaincodeBroker) createReferral(stub *shim.ChaincodeStub
 			return []byte("Count not index the bytes by department from the value: " + referralData + " on the ledger"), err
 		}
 	}
+	
+	if err != nil {
+				fmt.Println("Error Running Retail create chaincode for payload: " + referralData)
+				fmt.Println(err.Error())
+			}
 		
 	return valAsbytes, nil
 }
@@ -301,9 +308,31 @@ func (t *ReferralPartnerChaincodeBroker) searchByStatus(args []string, stub *shi
 	
 	searchResults = append(searchResults, matchingRetailReferrals...)
 	
-	searchResults = append(searchResults, matchingCommercialReferrals...)
-	
-	searchResults = append(searchResults, matchingBankingReferrals...)
+	for i := range matchingCommercialReferrals {
+		matchFound := false
+		for j := range searchResults {
+		    if matchingCommercialReferrals[i].ReferralId == searchResults[j].ReferralId  {
+				matchFound = true
+			}
+		}
+		
+		if matchFound == false {
+			searchResults = append(searchResults, matchingCommercialReferrals[i])
+		}
+	}
+
+	for i := range matchingBankingReferrals {
+		matchFound := false
+		for j := range searchResults {
+		    if matchingBankingReferrals[i].ReferralId == searchResults[j].ReferralId  {
+				matchFound = true
+			}
+		}
+		
+		if matchFound == false {
+			searchResults = append(searchResults, matchingBankingReferrals[i])
+		}
+	}
 		
 	if(err != nil) {
 		return nil, err
