@@ -220,7 +220,7 @@ func (t *ReferralPartnerChaincodeBroker) createReferral(stub *shim.ChaincodeStub
 	// Create a ledger record that indexes the referral id by the partner
 	for i := range referral.Departments {
 	    if referral.Departments[i] == "RETAIL" {
-			fmt.Println("Running Retail create chaincode for payload: " + referralData)
+			fmt.Println("Running Retail create chaincode for id: " + t.RetailChaincode + " and payload: " + referralData)
 			valAsbytes, err = stub.InvokeChaincode(t.RetailChaincode, "Invoke", args)
 			
 		} else if referral.Departments[i] == "COMMERCIAL" {
